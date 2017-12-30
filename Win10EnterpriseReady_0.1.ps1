@@ -12,7 +12,7 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 #region Global App Info
 
-$version = '0.1'
+$version = '0.01'
 $iniFile = "$PSScriptRoot\config.ini"
 $mode = 'manual'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -22,18 +22,16 @@ $mode = 'manual'
 #region Public functions
 
 function dl_latest {
-    $api_response = Invoke-WebRequest -Uri "https://api.github.com/repos/ImminentFate/CompactGUI/releases/latest" | ConvertFrom-Json | select -expandproperty 'assets'
+    $api_response = Invoke-WebRequest -Uri "https://api.github.com/repos/Sidewinder53/Win10EnterpriseReady/releases/latest" | ConvertFrom-Json
+    $dl_tag_name = $api_response.'tag_name'
     $dl_name = $api_response.'name'
-    $dl_url = $api_response.'browser_download_url'
-    #Invoke-WebRequest -Uri $dl_url -OutFile "$PSScriptRoot\$dl_name"
+    $dl_url = $api_response.'zipball_url'
+    Invoke-WebRequest -Uri $dl_url -OutFile "$PSScriptRoot\Win10EnterpriseReady_$dl_tag_name.zip"
 }
 
 function check_latest {
-    $api_response = Invoke-WebRequest -Uri "https://api.github.com/repos/ImminentFate/CompactGUI/releases/latest" | ConvertFrom-Json
-    #$up_to_date = $version -ge ($api_response.'tag_name' -replace "[^0-9\.]")
-    # DEBUG
-    $up_to_date = $version -ge '0.1'
-    # DEBUG
+    $api_response = Invoke-WebRequest -Uri "https://api.github.com/repos/Sidewinder53/Win10EnterpriseReady/releases/latest" | ConvertFrom-Json | % { if (-not ($_.'tag_name' -eq $null)) { $_.'tag_name' -replace "[^0-9\.]" } }
+    $up_to_date = $version -ge $api_response
     return $up_to_date
 }
 
